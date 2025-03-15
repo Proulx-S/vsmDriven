@@ -175,7 +175,7 @@ if 1
                 %resp
                 info.doCat = 0;
                 info.doRun = 1;
-                [volRespCat,volActCat,volResp,volAct,info] = volTsGetResp5(do,info,volTs,dsgn,hdMask,forceThis,verboseThis);
+                [volRespCat,volActCat,volResp,volAct,info] = volTsGetResp5(do,info,volTs(1:2),dsgn,hdMask,forceThis,verboseThis);
                 rCond{S}.(acq).(task).volRespCat = volRespCat;
                 rCond{S}.(acq).(task).volActCat  = volActCat;
                 rCond{S}.(acq).(task).volResp    = volResp;

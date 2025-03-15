@@ -33,3 +33,6 @@ octave-workspace
 # Data files
 *.mat
 *.fig
+
+# Afni
+*.err
