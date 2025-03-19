@@ -27,16 +27,26 @@ end
 % Load dependencies
 %%% matlab
 addpath(genpath(         workDir                                 ))
-addpath(genpath(fullfile(toolDir,'vasomoTools'                  )))
+tool = 'vasomoTools'; toolURL = 'https://github.com/Proulx-S/vasomoTools.git';
+if ~exist(fullfile(toolDir, tool), 'dir'); system(['git clone ' toolURL ' ' fullfile(toolDir, tool)]); end
+addpath(genpath(fullfile(toolDir,tool)))
+tool = 'chronux'; toolURL = 'https://github.com/Proulx-S/chronux';
+if ~exist(fullfile(toolDir, tool), 'dir'); system(['git clone ' toolURL ' ' fullfile(toolDir, tool)]); end
 addpath(genpath(fullfile(toolDir,'chronux/chronux_2_12/modified')))
+tool = 'fieldtrip'; toolURL = 'https://github.com/fieldtrip/fieldtrip';
+if ~exist(fullfile(toolDir, tool), 'dir'); system(['git clone ' toolURL ' ' fullfile(toolDir, tool)]); end
 addpath(genpath(fullfile(toolDir,'fieldtrip/external/freesurfer')))
 %%% neurodesk
 switch envId
     case 1
         global src
+        %%%% afni
         src.afni = 'ml afni/24.3.00';
+        system([src.afni '; 3dinfo > /dev/null'],'-echo');
+        %%%% freesurfer
         src.fs   = 'ml freesurfer/8.0.0';
-        % add fslview once we figure out how to make it work
+        system([src.fs   '; mri_convert > /dev/null'],'-echo');
+        %%%% fsl for fslview once we figure out how to make it work
     otherwise
         dbstack; error('not implemented')
         % neurodeskModule = {
@@ -62,15 +72,16 @@ if updatePreproc
     save(mfilename('fullpath'),'info','rCond','subList','runCondAcqList','runCondStimList','-v7.3')
 else
     disp(['loading from workFile ' workFile]);
-    tic
     load(workFile,'info','rCond','subList','runCondAcqList','runCondStimList')
-    toc
 end
 
 % Make sure paths in workFile are the correct ones
-if strcmp(java.lang.System.getProperty('user.name'),'matlab')
-    rCond = renameAllPaths(rCond,{'/autofs/space/takoyaki_001/users/proulxs/' '/space/takoyaki/1/users/proulxs/'},'/data/martinos/');
-    info = renameAllPaths(info,{'/autofs/space/takoyaki_001/users/proulxs/' '/space/takoyaki/1/users/proulxs/'},'/data/martinos/');
+switch envId
+    case 1
+        rCond = renameAllPaths(rCond,{'/autofs/space/takoyaki_001/users/proulxs/' '/space/takoyaki/1/users/proulxs/'},'/local/users/sebp/martinos/');
+        info  = renameAllPaths(info, {'/autofs/space/takoyaki_001/users/proulxs/' '/space/takoyaki/1/users/proulxs/'},'/local/users/sebp/martinos/');
+    otherwise
+        dbstack; error('not implemented')
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,7 +124,6 @@ for S = 1:length(rCond)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 
 
