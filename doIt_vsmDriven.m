@@ -1,63 +1,52 @@
-% clear all
+clear all
 close all
-storageDir = '/data/vsmDriven/vsmDriven/'; if ~exist(storageDir,'dir'); mkdir(storageDir); end
-scratchDir = '/data/vsmDriven/vsmDriven/'; if ~exist(scratchDir,'dir'); mkdir(scratchDir); end
-workFile   = '/data/vsmDriven/vsmDriven/'; if ~exist(workFile  ,'dir'); mkdir(workFile  ); end
-pipId = mfilename;
-storageDir = fullfile(storageDir, pipId        ); if ~exist(storageDir,'dir'); mkdir(storageDir); end
-scratchDir = fullfile(scratchDir, pipId        ); if ~exist(scratchDir,'dir'); mkdir(scratchDir); end
-workFile   = fullfile(workFile  ,[pipId '.mat']);
 
-% [outDir,pipId] = fileparts(mfilename('fullpath'));
-% scrtchDir = fullfile('/data/vsmDriven/',pipId);  if ~exist(outDir,'dir'); mkdir(outDir); end
-% outDir = fullfile(outDir,pipId); if ~exist(outDir,'dir'); mkdir(outDir); end
+%%%%%%%%%%%%
+%% Set up %%
+%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%
-%% Dependencies %%
-%%%%%%%%%%%%%%%%%%
+% Detect computing environment
+os   = char(java.lang.System.getProperty('os.name'));
+host = char(java.net.InetAddress.getLocalHost.getHostName);
+user = char(java.lang.System.getProperty('user.name'));
 
-% matlab
-addpath(genpath(fullfile(pwd,pipId)))
-if strcmp(java.lang.System.getProperty('user.name'),'matlab')
-    neurodeskModule = {
-        ":/neurodesktop-storage/containers/freesurfer_8.0.0_20250210"
-        ":/neurodesktop-storage/containers/afni_24.3.00_20241003"};
-    for i = 1:length(neurodeskModule)
-        if contains(getenv("PATH"),neurodeskModule{i}); continue; end
-        setenv("PATH",getenv("PATH") + neurodeskModule{i});
-    end
-    addpath(genpath('/home/jovyan/work/tools/fieldtrip/external/freesurfer'))
-    addpath(genpath('/home/jovyan/work/tools/vasomoTools'))
-    addpath(genpath('/home/jovyan/work/tools/chronux/chronux_2_12/modified'))
+% Configure paths accordingly
+if strcmp(os,'Linux') && strcmp(host,'takoyaki') && strcmp(user,'sebp')
+    storageDir = '/local/users/sebp/';
+    scratchDir = '/scratch/users/sebp/';
+    toolDir    = '~/tools';
+    workScript = mfilename;
+    workFile   = [workScript '.mat'];
+    workDir    = fullfile('~/work/vsmDriven/',workScript); if ~exist(workDir,'dir'); mkdir(workDir); end
+    workFile   = fullfile(fileparts(workDir),workFile);
+    envId      = 1;
 else
-    addpath(genpath('/usr/local/freesurfer/stable7.4.1/matlab/'))
-    addpath(genpath('/space/takoyaki/1/users/proulxs/tools/vasomoTools'))
-    addpath(genpath('/space/takoyaki/1/users/proulxs/tools/chronux'))
+    dbstack; error('not implemented')
 end
 
-
-
-% addpath(genpath('/space/takoyaki/1/users/proulxs/tools/chronux'))
-
-% addpath(genpath('/space/takoyaki/1/users/proulxs/tools/bassReg2'))
-% addpath(genpath('/space/takoyaki/1/users/proulxs/tools/martinosTools'))
-% addpath(genpath('/space/takoyaki/1/users/proulxs/tools/util'))
-% % addpath(genpath('/space/takoyaki/1/users/proulxs/tools/CircStat2012a'))
-% % addpath(genpath('/space/takoyaki/1/users/proulxs/tools/shplot'))
-% % addpath(genpath('/space/takoyaki/1/users/proulxs/tools/hex_and_rgb_v1.1.1'))
-% % addpath(genpath('/space/takoyaki/1/users/proulxs/tools/mask2poly'))
-% % addpath(genpath('/space/takoyaki/1/users/proulxs/tools/contourcs'))
-% % addpath(genpath('/space/takoyaki/1/users/proulxs/tools/BrewerMap'))
-% % addpath(genpath('/space/takoyaki/1/users/proulxs/tools/shplot'))
-
-% % bash
-% global srcAfni srcFs
-% srcFs = 'source /usr/local/freesurfer/fs-stable741-env-autoselect';
-% srcAfni = 'export PATH=$PATH:/usr/pubsw/packages/AFNI/23.1.05';
-% %%%%%%%%%%%%%%%%%%
-% %% %%%%%%%%%%%%%%%
-
-
+% Load dependencies
+%%% matlab
+addpath(genpath(         workDir                                 ))
+addpath(genpath(fullfile(toolDir,'vasomoTools'                  )))
+addpath(genpath(fullfile(toolDir,'chronux/chronux_2_12/modified')))
+addpath(genpath(fullfile(toolDir,'fieldtrip/external/freesurfer')))
+%%% neurodesk
+switch envId
+    case 1
+        global src
+        src.afni = 'ml afni/24.3.00';
+        src.fs   = 'ml freesurfer/8.0.0';
+        % add fslview once we figure out how to make it work
+    otherwise
+        dbstack; error('not implemented')
+        % neurodeskModule = {
+        % ":/neurodesktop-storage/containers/freesurfer_8.0.0_20250210"
+        % ":/neurodesktop-storage/containers/afni_24.3.00_20241003"};
+        % for i = 1:length(neurodeskModule)
+        %     if contains(getenv("PATH"),neurodeskModule{i}); continue; end
+        %     setenv("PATH",getenv("PATH") + neurodeskModule{i});
+        % end
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
