@@ -1,2 +1,1 @@
-*+ WARNING: '-stim_times 1' (GLOBAL) has 2 runs and 2 early events; do you want LOCAL times?
-*+ WARNING: '-stim_times 1' file '/local/users/sebp/martinos/vsmDriven/doIt_generalPreproc/vsmDriven/proc/sub-vsmDrivenP1/ses-1/set-vfMRI/sub-vsmDrivenP1_ses-1_task-20sPrd1sDur_acq-vfMRIinflow_run-cat_angio/task-20sPrd1sDur_cond-catch_model-SPMG2_startTime.1D' has 1 duplicate and 0 near-duplicate times ???
+*+ WARNING: Smallest FDR q [12 05sPrd1sDur_catch_Fstat] = 0.478569 ==> few true single voxel detections
