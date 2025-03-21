@@ -180,11 +180,11 @@ if 1
                 %resp
                 % info.doCat = 0;
                 % info.doRun = 1;
-                [volRespCat,volActCat,volResp,volAct,info] = getVolResp(info,volTs,dsgn,hdMask,forceThis,verboseThis);
-                rCond{S}.(acq).(task).volRespCat = volRespCat;
-                rCond{S}.(acq).(task).volActCat  = volActCat;
-                rCond{S}.(acq).(task).volResp    = volResp;
-                rCond{S}.(acq).(task).volAct     = volAct;
+                try
+                    rCond{S}.(acq).(task).volResp = getVolResp(info,volTs,dsgn,hdMask,forceThis,verboseThis);
+                catch err
+                    save(fullfile(workDir,['errorData_S-' num2str(S) '_A-' num2str(A) '_T-' num2str(T) '.mat']))
+                end
 
             end
         end
