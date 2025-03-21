@@ -127,9 +127,14 @@ end
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Response estimation and activation detection processing %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Response estimation and activation detection processing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%
+%%% NOTE: Need to figure out run order. Probably need to perform a sort according to acquisition time. More importantly, run-r in the bids filename might not always match the run index here in matlab (e.g. bids run-r might not be starting at and increasing by 1, and some runs might be excluded)
+%%%
+
 if 1
     do.loadIt   = 0;
     do.doIt     = 1;
@@ -164,6 +169,7 @@ if 1
                 for i = 1:length(volTs)
                     volTs(i).mri.nFrame     = volTs(i).nFrame;
                     volTs(i).mri.nFrameOrig = volTs(i).nFrameOrig;
+                    volTs(i).tr = volTs(i).mri.tr;
                 end
                 % [volTs.mri.nFrame] = deal(349);
                 % [volTs.nFrame] = deal(349);
@@ -172,9 +178,9 @@ if 1
                 dsgn = rCond{S}.(acq).(task).dsgn;
 
                 %resp
-                info.doCat = 0;
-                info.doRun = 1;
-                [volRespCat,volActCat,volResp,volAct,info] = volTsGetResp5(do,info,volTs(1:2),dsgn,hdMask,forceThis,verboseThis);
+                % info.doCat = 0;
+                % info.doRun = 1;
+                [volRespCat,volActCat,volResp,volAct,info] = getVolResp(info,volTs,dsgn,hdMask,forceThis,verboseThis);
                 rCond{S}.(acq).(task).volRespCat = volRespCat;
                 rCond{S}.(acq).(task).volActCat  = volActCat;
                 rCond{S}.(acq).(task).volResp    = volResp;

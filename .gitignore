@@ -36,3 +36,10 @@ octave-workspace
 
 # Afni
 *.err
+*.BRIK
+*.HEAD
+*.nii
+*.nii.gz
+
+# Cursor
+.cursorignore
