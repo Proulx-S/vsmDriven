@@ -181,10 +181,13 @@ if 1
                 % info.doCat = 0;
                 % info.doRun = 1;
                 try
+
+                    load /home/sebp/work/vsmDriven/doIt_vsmDriven/errorData_S-5_A-1_T-1.mat
                     rCond{S}.(acq).(task).volResp = getVolResp(info,volTs,dsgn,hdMask,forceThis,verboseThis);
                 catch err
                     save(fullfile(workDir,['errorData_S-' num2str(S) '_A-' num2str(A) '_T-' num2str(T) '.mat']))
                 end
+                close all
 
             end
         end

@@ -1,1 +1,3 @@
-*+ WARNING: Smallest FDR q [12 05sPrd1sDur_catch_Fstat] = 0.478569 ==> few true single voxel detections
+** ERROR: 'TENTzero(0,-27.72,-32)' is illegal
+** ERROR:  Correct format: 'TENTzero(bot,top,n)' with bot < top and n > 2.
+** FATAL ERROR: '-stim_times 1': don't understand basis function model 'TENTzero(0,-27.72,-32)' [nopt=20]
