@@ -1,9 +1,9 @@
 clear all
 close all
 
-%%%%%%%%%%%%
-%% Set up %%
-%%%%%%%%%%%%
+%%%%%%%%%
+%% Set up 
+%%%%%%%%%
 
 % Detect computing environment
 os   = char(java.lang.System.getProperty('os.name'));
@@ -181,11 +181,10 @@ if 1
                 % info.doCat = 0;
                 % info.doRun = 1;
                 try
-
-                    load /home/sebp/work/vsmDriven/doIt_vsmDriven/errorData_S-5_A-1_T-1.mat
+                    % load /home/sebp/work/vsmDriven/doIt_vsmDriven/errorData_S-5_A-1_T-1.mat
                     rCond{S}.(acq).(task).volResp = getVolResp(info,volTs,dsgn,hdMask,forceThis,verboseThis);
                 catch err
-                    save(fullfile(workDir,['errorData_S-' num2str(S) '_A-' num2str(A) '_T-' num2str(T) '.mat']))
+                    save(fullfile(workDir,['errorData_S-' num2str(S) '_A-' num2str(A) '_T-' num2str(T) '.mat']),'err')
                 end
                 close all
 
@@ -195,7 +194,6 @@ if 1
 end
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-save tmp rCond
 return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
