@@ -1,1 +1,2 @@
-*+ WARNING: Smallest FDR q [6 05sPrd1sDur_catch_Fstat] = 0.125365 ==> few true single voxel detections
+*+ WARNING: Smallest FDR q [0 Full_Fstat] = 0.645931 ==> few true single voxel detections
+*+ WARNING: Smallest FDR q [6 50sPrd5sDur_stim_Fstat] = 0.645931 ==> few true single voxel detections

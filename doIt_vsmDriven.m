@@ -12,14 +12,15 @@ user = char(java.lang.System.getProperty('user.name'));
 
 % Configure paths accordingly
 if strcmp(os,'Linux') && strcmp(host,'takoyaki') && strcmp(user,'sebp')
-    storageDir = '/local/users/sebp/';
-    scratchDir = '/scratch/users/sebp/';
-    toolDir    = '~/tools';
+    storageDir = '/local/users/Proulx-S/';
+    scratchDir = '/scratch/users/Proulx-S/';
+    toolDir    = fullfile(getenv('HOME'),'tools');
     workScript = mfilename;
     workFile   = [workScript '.mat'];
-    workDir    = fullfile('~/work/vsmDriven/',workScript); if ~exist(workDir,'dir'); mkdir(workDir); end
+    workDir    = fullfile(getenv('HOME'),'/work/vsmDriven/',workScript); if ~exist(workDir,'dir'); mkdir(workDir); end
     workFile   = fullfile(fileparts(workDir),workFile);
     envId      = 1;
+    setenv('SINGULARITY_BINDPATH',strjoin({storageDir scratchDir toolDir workDir},','));
 else
     dbstack; error('not implemented')
 end
@@ -57,11 +58,13 @@ switch envId
         %     setenv("PATH",getenv("PATH") + neurodeskModule{i});
         % end
 end
+%% %%%%%%
 
+if 0
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Load preprocessed data filenames %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Load preprocessed data filenames
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 updatePreproc = 0;
 if updatePreproc
     error('double-check that')
@@ -78,19 +81,17 @@ end
 % Make sure paths in workFile are the correct ones
 switch envId
     case 1
-        rCond = renameAllPaths(rCond,{'/autofs/space/takoyaki_001/users/proulxs/' '/space/takoyaki/1/users/proulxs/'},'/local/users/sebp/martinos/');
-        info  = renameAllPaths(info, {'/autofs/space/takoyaki_001/users/proulxs/' '/space/takoyaki/1/users/proulxs/'},'/local/users/sebp/martinos/');
+        rCond = renameAllPaths(rCond,{'/autofs/space/takoyaki_001/users/proulxs/' '/space/takoyaki/1/users/proulxs/'},'/local/users/Proulx-S/martinos/');
+        info  = renameAllPaths(info, {'/autofs/space/takoyaki_001/users/proulxs/' '/space/takoyaki/1/users/proulxs/'},'/local/users/Proulx-S/martinos/');
     otherwise
         dbstack; error('not implemented')
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Anatomical processing (masks and rois) %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Anatomical processing (masks and rois)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 do.loadIt = 0;
 do.doIt   = 1;
 do.saveIt = 0;
@@ -122,9 +123,8 @@ for S = 1:length(rCond)
         disp(out.mask.vessel.f)
     end
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -140,7 +140,7 @@ if 1
     do.doIt     = 1;
     do.saveIt   = 0;
     do.writeIt  = 1;
-    forceThis   = 1;
+    forceThis   = 0;
     verboseThis = 1;
 
     for S = 1:size(rCond,1)
@@ -181,10 +181,10 @@ if 1
                 % info.doCat = 0;
                 % info.doRun = 1;
                 try
-                    % load /home/sebp/work/vsmDriven/doIt_vsmDriven/errorData_S-5_A-1_T-1.mat
+                    % load('/home/sebp/work/vsmDriven/doIt_vsmDriven/errorData_S-5_A-1_T-4.mat')
                     rCond{S}.(acq).(task).volResp = getVolResp(info,volTs,dsgn,hdMask,forceThis,verboseThis);
                 catch err
-                    save(fullfile(workDir,['errorData_S-' num2str(S) '_A-' num2str(A) '_T-' num2str(T) '.mat']),'err')
+                    save(fullfile(workDir,['errorData_S-' num2str(S) '_A-' num2str(A) '_T-' num2str(T) '.mat']),'-v7.3')
                 end
                 close all
 
@@ -192,9 +192,66 @@ if 1
         end
     end
 end
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+save(fullfile('doIt_vsmDriven','tmp.mat'),'-v7.3')
+end
+load(fullfile('doIt_vsmDriven','tmp.mat'))
+
+
+
+%% Export data for Jacob
+for S = 1:size(rCond,1)
+    disp(['sub' num2str(S) '/' num2str(size(rCond,1))])
+    
+    %%% Read vessel mask
+    rCond{S}.vfMRI.anat.label.vessel.mri = MRIread(char(rCond{S}.vfMRI.anat.label.vessel.f));
+    mask = logical(rCond{S}.vfMRI.anat.label.vessel.mri.vol);
+    rCond{S}.vfMRI.anat.label.vessel.mri = vol2vec(rCond{S}.vfMRI.anat.label.vessel.mri,mask);
+
+    
+    taskList = fields(rCond{S}.vfMRI);
+    taskList(~contains(taskList,'task_')) = [];
+    for T = 1:length(taskList)
+        disp(['task' num2str(T) '/' num2str(length(taskList))])
+        task = taskList{T};
+        %%% Read volTs timeseries
+        for R = 1:length(rCond{S}.vfMRI.(task).volTs)
+            % disp(['volTs' num2str(R) '/' num2str(length(rCond{S}.vfMRI.(task).volTs))])
+            rCond{S}.vfMRI.(task).volTs(R).mri = vol2vec(MRIread(rCond{S}.vfMRI.(task).volTs(R).mri.fspec),mask);
+            rCond{S}.vfMRI.(task).volTs(R).mri.t = rCond{S}.vfMRI.(task).volTs(R).mri.t - rCond{S}.vfMRI.(task).volTs(R).mri.tr/1000 .* rCond{S}.vfMRI.(task).nDummy(R);
+        end
+        %%% Read volResp timeseries
+        if ~isempty(rCond{S}.vfMRI.(task).volResp)
+            tmp2 = [];
+            for R = 1:length(rCond{S}.vfMRI.(task).volResp.respRun)
+                % disp(['volResp' num2str(R) '/' num2str(length(rCond{S}.vfMRI.(task).volResp.respRun))])
+                tmp = [];
+                for C = 1:length(rCond{S}.vfMRI.(task).volResp.respRun(R).fResp)
+                    tmp = cat(2,tmp,vol2vec(MRIread(rCond{S}.vfMRI.(task).volResp.respRun(R).fResp{C}),mask));
+                end
+                tmp2 = cat(1,tmp2,tmp);
+            end
+            rCond{S}.vfMRI.(task).volResp = tmp2; clear tmp tmp2
+        end
+    end
+    
+    disp('----')
+    disp(['saving sub' num2str(S) '/' num2str(size(rCond,1))])
+    disp('----')
+    %%% Save data
+    data = rCond{S}.vfMRI; rCond{S}.vfMRI = [];
+    save(fullfile(workDir,[data.(task).info.sub '.mat']),'data','-v7.3')
+
+    %%% Save QA figure
+    copyfile(...
+        rCond{S}.QA.vfMRI.fig.fAfter,...
+        fullfile(workDir,[data.(task).info.sub '_QA.fig']));
+end
 return
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Frequency-domain frequency-response prediction (fundamental only) %%
